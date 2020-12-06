@@ -1,0 +1,5 @@
+P5
+# A simple 5x5 test pgm
+5 5
+255
+abcdebcdeacdeabdeabceabcd

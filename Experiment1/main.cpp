@@ -38,8 +38,6 @@ void normalize_image(Image& image, float* pixels) {
 		}
 	}
 
-	//std::cout << min << ", " << max << std::endl;
-
 	for (int i = 0; i < image.rows; i++){
 		for (int j = 0; j < image.cols; j++){
 		
@@ -97,6 +95,12 @@ void smooth_image_gaussian(Image& image, int mask_size){
    	}
 }
 
+/*
+  Filters an image in order to remove periodic noise
+  @Param: image - the noisy input image that will be filtered
+  @Param: return_noise - whether to return just the noise from the image
+  @Return: void
+*/
 void filter_noise(Image& image, bool return_noise) {
 
 	std::complex<float>* transform =
@@ -108,13 +112,6 @@ void filter_noise(Image& image, bool return_noise) {
 
 	for (unsigned i = 0; i < image.rows; i++) {
 		for (unsigned j = 0; j < image.cols; j++) {
-
-			/*if ((abs(i - 256) > 15 && abs(i - 256) < 17))
-			{
-				if ((abs(j - 256) > 31 && abs(j - 256) < 33)) {
-					transform[i*image.cols + j] = std::complex<float>(0, 0);
-				}
-			}*/
 
 			if(return_noise == false){
 				if((i % 16 == 0 && j % 16 == 0))
@@ -145,14 +142,36 @@ void filter_noise(Image& image, bool return_noise) {
 int main(int argc, char** argv) {
 	std::cout << "Experiment 1: Noise Removal" << std::endl;
 
+	// Read and copy input image
 	std::ifstream inFile(argv[1]);
  	Image image = Image::read(inFile);
+ 	Image spectrum = Image(image);
  	Image smoothed = Image(image);
  	Image noise = Image(image);
 
+ 	// get spectrum of image for visualization
+ 	std::complex<float>* transform =
+	    new std::complex<float>[image.rows * image.cols];
+
+	fft2D(spectrum, transform, true);
+
+	float pixels[image.rows * image.cols];
+	for (unsigned i = 0; i < spectrum.rows; i++) {
+		for (unsigned j = 0; j < spectrum.cols; j++) {
+
+			double mag = std::abs(transform[i*image.cols + j]);
+			pixels[i*image.rows + j] = 20 * log(1 + mag);
+		}
+	}
+	normalize_image(spectrum, pixels);
+
+	// Filter image
  	filter_noise(image, false);
+
+ 	// Return noise from image
  	filter_noise(noise, true);
 
+ 	// Smooth orignal image for comparison
 	smooth_image_gaussian(smoothed, 7);
 
 	// Save output images
@@ -167,6 +186,10 @@ int main(int argc, char** argv) {
 
 	outFile.open(std::string(argv[2]).substr(0, std::string(argv[2]).find('.')) + "_noise.pgm");
 	outFile << noise;
+	outFile.close();
+
+	outFile.open(std::string(argv[2]).substr(0, std::string(argv[2]).find('.')) + "_spectrum.pgm");
+	outFile << spectrum;
 	outFile.close();
 
 	return 0;

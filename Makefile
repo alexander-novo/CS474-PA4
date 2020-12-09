@@ -13,8 +13,8 @@ SOURCES      = Common/image.cpp Common/fft.cpp Common/mask.cpp Experiment1/main.
 # Executable targets - add more to auto-make in default 'all' target
 EXEC         = Experiment1/remove-noise Experiment2/frequency-filter Experiment3/homomorphic
 # Targets required for the homework, spearated by experiment
-REQUIRED_1   = 
-REQUIRED_2   = 
+REQUIRED_1   = out/boy.pgm
+REQUIRED_2   = out/lenna_filtered.pgm
 REQUIRED_3   = 
 REQUIRED_OUT = $(REQUIRED_1) $(REQUIRED_2) $(REQUIRED_3)
 
@@ -39,14 +39,19 @@ Experiment3/homomorphic: $(OBJDIR)/Experiment3/main.o $(OBJDIR)/Common/image.o $
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 ### Experiment 1 Outputs ###
+out/boy.pgm: Experiment1/remove-noise | out
+	Experiment1/remove-noise Images/boy_noisy.pgm out/boy.pgm
 
 ### Experiment 2 Outputs ###
+out/lenna_filtered.pgm: Experiment2/frequency-filter | out
+	Experiment2/frequency-filter Images/lenna.pgm out/lenna_filtered.pgm
 
 ### Experiment 3 Outputs ###
 
 
 # Figures needed for the report
-report:
+report: out/boy.png out/boy_smoothed.png out/boy_noise.png
+report: out/lenna_filtered_spatial.png lenna_filtered_frequency.png
 
 clean:
 	rm -rf $(OBJDIR)

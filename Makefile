@@ -39,14 +39,14 @@ Experiment3/homomorphic: $(OBJDIR)/Experiment3/main.o $(OBJDIR)/Common/image.o $
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 ### Experiment 1 Outputs ###
-out/boy.pgm out/boy_smoothed.pgm out/boy_noise.pgm out/boy_spectrum.pgm: Experiment1/remove-noise | out
+out/boy.pgm out/boy_smoothed_7.pgm out/boy_smoothed_15.pgm out/boy_noise.pgm out/boy_spectrum.pgm: Experiment1/remove-noise | out
 	Experiment1/remove-noise Images/boy_noisy.pgm out/boy.pgm
 
 ### Experiment 2 Outputs ###
 out/lenna_filtered_frequency.pgm out/lenna_filtered_spatial.pgm out/sobel_imag.dat out/sobel_spectrum.pgm: Experiment2/frequency-filter | out
 	Experiment2/frequency-filter Images/lenna.pgm out/lenna_filtered.pgm
 
-out/sobel.pdf: out/sobel_imag.dat | out
+out/sobel.pdf: Experiment2/sobel.plt out/sobel_imag.dat | out
 	gnuplot Experiment2/sobel.plt
 
 ### Experiment 3 Outputs ###

@@ -9,8 +9,8 @@ set output outfile
 set hidden3d 
 set isosamples 100
 set pm3d at bs
-set ztics ('{/Symbol g}_L' gl, '{/Symbol g}_H' gh)
-set cbtics ('{/Symbol g}_L' gl, '{/Symbol g}_H' gh)
+set ztics ('{/Symbol g}_L' gl+.01, '{/Symbol g}_H' gh)
+set cbtics ('{/Symbol g}_L' gl+.01, '{/Symbol g}_H' gh)
 set contour both
 set cntrparam levels discrete (gh - gl)*(1 - exp(-c))+gl
 set clabel 'D_0'

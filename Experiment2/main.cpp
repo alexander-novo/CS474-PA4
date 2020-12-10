@@ -51,7 +51,7 @@ void spatially_filter(Image& image, int mask_size) {
 					else
 						output_pixel_value +=
 						    image[i + k][j + l] *
-						    sobel_mask[mask_size/2 - k][mask_size/2 - l];
+						    sobel_mask[mask_size / 2 - k][mask_size / 2 - l];
 				}
 			}
 
@@ -69,7 +69,8 @@ void freq_filter(Image& image, Image& maskSpectrum,
 	// take fft of image with shift
 	std::complex<float>* transform = new std::complex<float>[image.rows * image.cols];
 
-	fft2D(image, transform, true);
+	// fft2D(image, transform, true);
+	fft2D(image, transform, false);
 
 	// intialize h(x,y)
 	float mask[image.rows][image.cols];
@@ -83,8 +84,7 @@ void freq_filter(Image& image, Image& maskSpectrum,
 			int x = image.rows / 2 - 1 + i;
 			int y = image.cols / 2 - 1 + j;
 
-			mask[x][y] =
-			    sobel_mask[i][j] * pow((-1), x + y);  // center spectrum of mask
+			mask[x][y] = sobel_mask[i][j];
 		}
 	}
 
@@ -105,7 +105,7 @@ void freq_filter(Image& image, Image& maskSpectrum,
 			// set real part to zero, undo cenetering of sobel mask
 			mask_transform[index] =
 			    std::complex<float>(0, mask_transform[index].imag()) *
-			    std::complex<float>(pow(-1, i + j));
+			    (float) pow(-1, i + j);
 
 			// multiply F(x,y) and H(x,y)
 			transform[index] *= mask_transform[index];
@@ -122,8 +122,7 @@ void freq_filter(Image& image, Image& maskSpectrum,
 	// update image
 	for (int i = 0; i < image.rows; i++) {
 		for (int j = 0; j < image.cols; j++) {
-			pixels[i * image.cols + j] = transform[i * image.cols + j].real() *
-			                             pow(-1, i + j);  // undo spectrum centering
+			pixels[i * image.cols + j] = transform[i * image.cols + j].real();
 		}
 	}
 

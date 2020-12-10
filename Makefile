@@ -50,7 +50,7 @@ out/lenna_filtered.pgm: Experiment2/frequency-filter | out
 
 
 # Figures needed for the report
-report: Images/boy_noisy.png out/boy.png out/boy_smoothed.png out/boy_noise.png out/boy_spectrum.png
+report: Images/boy_noisy.png out/boy.png out/boy_smoothed_7.png out/boy_smoothed_15.png out/boy_noise.png out/boy_spectrum.png
 report: out/lenna_filtered_spatial.png out/lenna_filtered_frequency.png
 
 clean:

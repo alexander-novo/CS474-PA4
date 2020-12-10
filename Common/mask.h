@@ -11,6 +11,7 @@ public:
 	MaskResult(unsigned rows, unsigned cols, T min = 0, T max = 0);
 	MaskResult(const MaskResult<T>&);  // Copy constructor
 	MaskResult(MaskResult<T>&&);       // Move constructor
+	MaskResult(const Image&);
 	~MaskResult();
 
 	operator Image() const&;
@@ -80,10 +81,10 @@ MaskResult<T>::MaskResult(const MaskResult<T>& other)
 #pragma omp parallel for reduction(min : min) reduction(max : max)
 	for (unsigned i = 0; i < _rows * _cols; i++) {
 		_data[i] = other._data[i];
-		if (data[i] < min)
-			min = data[i];
-		else if (data[i] > max)
-			max = data[i];
+		if (_data[i] < min)
+			min = _data[i];
+		else if (_data[i] > max)
+			max = _data[i];
 	}
 }
 
@@ -93,6 +94,19 @@ MaskResult<T>::MaskResult(MaskResult<T>&& other)
 	other._rows = other._cols = other.min = other.max = 0;
 	delete[] other._data;
 	other._data = nullptr;
+}
+
+template <typename T>
+MaskResult<T>::MaskResult(const Image& other)
+    : MaskResult(other.rows, other.cols, 0, 0) {
+#pragma omp parallel for reduction(min : min) reduction(max : max)
+	for (unsigned i = 0; i < _rows * _cols; i++) {
+		_data[i] = other.pixels[i];
+		if (_data[i] < min)
+			min = _data[i];
+		else if (_data[i] > max)
+			max = _data[i];
+	}
 }
 
 template <typename T>

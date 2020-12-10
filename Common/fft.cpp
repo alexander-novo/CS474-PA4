@@ -236,7 +236,7 @@ void fft2D(unsigned N, unsigned M, float real_Fuv[], float imag_Fuv[], int isign
 	delete[] data;
 }
 
-void fft2D(Image im, std::complex<float> transform[], bool shift) {
+void fft2D(const Image& im, std::complex<float> transform[], bool shift) {
 	if (shift) {
 #pragma omp parallel for collapse(2)
 		for (unsigned y = 0; y < im.rows; y++) {
@@ -249,6 +249,25 @@ void fft2D(Image im, std::complex<float> transform[], bool shift) {
 #pragma omp parallel for
 		for (unsigned i = 0; i < im.rows * im.cols; i++) {
 			transform[i] = {im.pixels[i], 0};
+		}
+	}
+
+	fft2D(transform, im.rows, im.cols, -1);
+}
+
+void fft2D(const MaskResult<float>& im, std::complex<float> transform[], bool shift) {
+	if (shift) {
+#pragma omp parallel for collapse(2)
+		for (unsigned y = 0; y < im.rows; y++) {
+			for (unsigned x = 0; x < im.cols; x++) {
+				float shift                = ((x + y) % 2 == 0) ? 1 : -1;
+				transform[y * im.cols + x] = {im[y][x] * shift, 0};
+			}
+		}
+	} else {
+#pragma omp parallel for
+		for (unsigned i = 0; i < im.rows * im.cols; i++) {
+			transform[i] = {im.data[i], 0};
 		}
 	}
 

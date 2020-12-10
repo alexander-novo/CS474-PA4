@@ -23,6 +23,26 @@ static const int mask_7x7[7][7] = {
 							
 						};
 
+//15x15 Gaussian mask
+static const int mask_15x15[15][15] = {
+
+	{2, 2,  3,  4,  5,  5,  6,  6,  6,  5,  5,  4,  3, 2, 2},
+	{2, 3,  4,  5,  7,  7,  8,  8,  8,  7,  7,  5,  4, 3, 2},
+	{3, 4,  6,  7,  9, 10, 10, 11, 10, 10,  9,  7,  6, 4, 3},
+	{4, 5,  7,  9, 10, 12, 13, 13, 13, 12, 10,  9,  7, 5, 4},
+	{5, 7,  9, 11, 13, 14, 15, 16, 15, 14, 13, 11,  9, 7, 5},
+	{5, 7, 10, 12, 14, 16, 17, 18, 17, 16, 14, 12, 10, 7, 5},
+	{6, 8, 10, 13, 15, 17, 19, 19, 19, 17, 15, 13, 10, 8, 6},
+	{6, 8, 11, 13, 16, 18, 19, 20, 19, 18, 16, 13, 11, 8, 6},
+	{6, 8, 10, 13, 15, 17, 19, 19, 19, 17, 15, 13, 10, 8, 6},
+	{5, 7, 10, 12, 14, 16, 17, 18, 17, 16, 14, 12, 10, 7, 5},
+	{5, 7,  9, 11, 13, 14, 15, 16, 15, 14, 13, 11,  9, 7, 5},
+	{4, 5,  7,  9, 10, 12, 13, 13, 13, 12, 10,  9,  7, 5, 4},
+	{3, 4,  6,  7,  9, 10, 10, 11, 10, 10,  9,  7,  6, 4, 3},
+	{2, 3,  4,  5,  7,  7,  8,  8,  8,  7,  7,  5,  4, 3, 2},
+	{2, 2,  3,  4,  5,  5,  6,  6,  6,  5,  5,  4,  3, 2, 2},
+};
+
 void normalize_image(Image& image, float* pixels) {
 
 	float max = -1000000.0;
@@ -62,7 +82,10 @@ void smooth_image_gaussian(Image& image, int mask_size){
 	for(int i = 0; i < mask_size; i++){
 		for (int j = 0; j < mask_size; j++){
 
-			normalizion_factor += mask_7x7[i][j];
+			if(mask_size == 7)
+				normalizion_factor += mask_7x7[i][j];
+			else
+				normalizion_factor += mask_15x15[i][j];
 		}
 	}
 
@@ -77,15 +100,15 @@ void smooth_image_gaussian(Image& image, int mask_size){
    			{
    				for (int l = -mask_size/2; l < mask_size/2 + 1; l++)
    				{
-   					//std::cout << i + k << ", " << j + l << std::endl;
-
    					//bounds checking and padding
    					if(i + k < 0 || i + k >= image.cols || j + l < 0 || j + l >= image.rows){
    						output_pixel_value += 0;
    					}
-   					else
-   						//calculate output value
+   					//calculate output value
+   					else if(mask_size == 7)
    						output_pixel_value += originalImage[i + k][j + l] * mask_7x7[k + mask_size/2][l + mask_size/2];
+   					else
+   						output_pixel_value += originalImage[i + k][j + l] * mask_15x15[k + mask_size/2][l + mask_size/2];
    				}
    			}
 
@@ -103,6 +126,7 @@ void smooth_image_gaussian(Image& image, int mask_size){
 */
 void filter_noise(Image& image, bool return_noise) {
 
+	// take FFT of image
 	std::complex<float>* transform =
 	    new std::complex<float>[image.rows * image.cols];
 
@@ -110,15 +134,20 @@ void filter_noise(Image& image, bool return_noise) {
 
 	float pixels[image.rows * image.cols];
 
+	// filter image frequencies
 	for (unsigned i = 0; i < image.rows; i++) {
 		for (unsigned j = 0; j < image.cols; j++) {
 
 			if(return_noise == false){
-				if((i % 16 == 0 && j % 16 == 0))
-				transform[i*image.cols + j] = std::complex<float>(0, 0);
+
+				// remove noisy frequencies
+				if(abs(i - 256) == 16 && abs(j - 256) == 32)
+					transform[i*image.cols + j] = std::complex<float>(0, 0);
 			}
 			else {
-				if( !(i % 16 == 0 && j % 16 == 0))
+
+				// remove all frequencies except noisy frequencies
+				if( !(abs(i - 256) == 16 && abs(j - 256) == 32))
 					transform[i*image.cols + j] = std::complex<float>(0, 0);
 			}
 
@@ -127,8 +156,10 @@ void filter_noise(Image& image, bool return_noise) {
 		}
 	}
 
+	// inverse fft
 	fft2D(transform, image.rows, image.cols, 1);
 
+	// reconstruct image
 	for (unsigned i = 0; i < image.rows; i++) {
 		for (unsigned j = 0; j < image.cols; j++) {
 
@@ -146,7 +177,8 @@ int main(int argc, char** argv) {
 	std::ifstream inFile(argv[1]);
  	Image image = Image::read(inFile);
  	Image spectrum = Image(image);
- 	Image smoothed = Image(image);
+ 	Image smoothed_7 = Image(image);
+ 	Image smoothed_15 = Image(image);
  	Image noise = Image(image);
 
  	// get spectrum of image for visualization
@@ -172,7 +204,8 @@ int main(int argc, char** argv) {
  	filter_noise(noise, true);
 
  	// Smooth orignal image for comparison
-	smooth_image_gaussian(smoothed, 7);
+ 	smooth_image_gaussian(smoothed_7, 7);
+	smooth_image_gaussian(smoothed_15, 15);
 
 	// Save output images
 	std::ofstream outFile;
@@ -180,8 +213,12 @@ int main(int argc, char** argv) {
 	outFile << image;
 	outFile.close();
 
-	outFile.open(std::string(argv[2]).substr(0, std::string(argv[2]).find('.')) + "_smoothed.pgm");
-	outFile << smoothed;
+	outFile.open(std::string(argv[2]).substr(0, std::string(argv[2]).find('.')) + "_smoothed_7.pgm");
+	outFile << smoothed_7;
+	outFile.close();
+
+	outFile.open(std::string(argv[2]).substr(0, std::string(argv[2]).find('.')) + "_smoothed_15.pgm");
+	outFile << smoothed_15;
 	outFile.close();
 
 	outFile.open(std::string(argv[2]).substr(0, std::string(argv[2]).find('.')) + "_noise.pgm");

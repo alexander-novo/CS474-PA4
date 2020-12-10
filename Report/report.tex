@@ -46,11 +46,68 @@
 
 \subsection{Theory}
 
+Frequency Filtering has many applications related to image restoration and enhancement. One application in particular is the removal of periodic noise within an image using some type of band-reject filter. This type of filter can be used to zero out a certain range of frequency values within an image. The ideal band-reject filter can be expressed mathematically as
+
+\[
+	H(u,v) = 	\begin{cases} 
+      				0 & D_0-\frac{W}{2} \leq D \leq D_0+\frac{W}{2} \\
+      				1 & otherwise \\
+   				\end{cases}
+\]
+
+where D is the distance from the center of the band, W is the with of the band, and D0 is the cutoff frequency.
+
+One issue with using the ideal band-reject filter is the inclusion of a ringing effect due to the overestimate of the frequency of certain image features. Therefore, in order to mitigate such effects a smoothed version of the ideal band-reject filter can be used. One example includes the Butterworth filter, which is expressed as 
+
+\[
+	H(u,v) = \frac{1}{1+[\frac{DW}{D^2-D_0^2}]^{2n}}
+\]
+
+where D, W, and D0 are as defined before and n is the order of the filter. Another example of a smooth band reject filter is the Gaussian filter, defined as
+
+\[
+	H(u,v) = 1-\exp{-[\frac{D^2-D_0^2}{DW}]^2}
+\]
+
+These filters can also be used to isolate a specific range of frequency values, which can be used to extract the noise from an image. The filter used in such an operation can be defined using
+
+\[
+	H_{BP}(u,v) = 1 - H(u,v)
+\]
+
 
 \subsection{Implementation}
 
+For the program implementation, the input image was read using command line arguments, and a copy of the image was made for the various output images. The filtering algorithm was used on two of the input image copies in order to remove or isolate the noise within the original image. Gaussian smoothing was then performed using a similar algorithm from Programming Assignment 2. The resulting images were then saved based on the output file command line argument.
+
+The algorithm for performing the noise removal first involves taking the 2D Fourier Transform of the original image. In order to identify the anomalous frequencies within the image, the spectrum was first shifted by multiplying each pixel by (-1)x + y. The complex values generated from taking the FFT of the image were stored using a one dimensional array of values with type std::complex<float>. Next, the resulting values were iterated over, and if both indices corresponding to the pixel location in the image were divisible by 16, the frequency at that location was zeroed out. The decision regarding which frequencies were removed was based on visual analysis of the spectrum of the noisy image. After taking the inverse fourier transform of the modified spectrum, the image pixels were updated by taking the real value and undoing the spectrum shift by multiplying f(x,y) by (-1)x + y.
 
 \subsection{Results and Discussion}
+
+Figure 1 shows the original image, along with its spectrum. The spectrum was generated using the 2D FFT and logarithmic scaling was used in order to enhance visualization. Based on the spectrum, there appears to be a periodic grid-like pattern of spikes in the frequency values spanning the whole spectrum. This grid of anomalous frequencies are most prominent near the edges of the spectrum, and four spikes forming a rectangle are especially evident near the center of the spectrum. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.25\textwidth]{../Images/boy_noisy}
+	\includegraphics[width=.25\textwidth]{../out/boy_spectrum}
+	\caption{The original noisy image along with its spectrum. The anomalous frequencies can be seen in a grid-like pattern spanning across the spectrum.}
+	\label{fig:boyNoisy}
+\end{figure}
+
+The result of zeroing out the anomalous frequency values are demonstrated in figure 2. Based on the figure, most of the noise has been removed, and the noise could also be isolated from the image rather effectively. However, there still remains some artifacts in the resulting image in the form of horizontal lines, which may possibly be the result of some noisy frequency remaining in the image after filtering. For comparison purposes, Gaussian smoothing using a 7x7 mask was performed on the original image. The noise pattern was also successfully extracted, and can also be seen in figure 2.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.25\textwidth]{../out/boy}
+	\includegraphics[width=.25\textwidth]{../out/boy_noise}
+	\includegraphics[width=.25\textwidth]{../out/boy_smoothed}
+	\caption{The results of noise removal using frequency filtering (left) and noise extraction (center). Gaussian smoothing was also used for comparison (right).}
+	\label{fig:boy}
+\end{figure}
+
+The effects of noise in images can have extensive implications regarding the utilization and effectiveness of facial verification and facial recognition systems. Failures of such systems can have negative impacts ranging from economic repercussions to privacy and safety concerns. One example involves the use of a facial verification system in commercial products, such as a phone or similar device. If the system used does not account for any noise or anomalous artifacts, it might lead to low performance accuracy. If these issues are widespread, it may lead to economic losses for the company. The failure of facial verification systems also has implications with the privacy of individuals, and ensuring that the system is accurate will help prevent any unauthenticated users from accessing other user’s protected information.
+
+The failure of facial recognition systems in the context of law enforcement may also have negative implications regarding public safety and security. With a growing number of law enforcement agencies employing facial recognition systems for identifying criminals, the failure to remove noise and artifacts becomes an even greater concern to safety. In this context, it is important to ensure the accuracy of these systems remains high in order to mitigate the chance of criminals escaping detection, or prevent an innocent person from being wrongly accused. With facial recognition systems being deployed in many public transport systems, it also becomes important to mitigate detection errors in order to help protect the public against potential threats of terrorism. Ensuring proper facial recognition may also prevent economic losses due to the occurrence of a domestic terror attack.
 
 
 %%%%%%%%%%%%%%%%%%%%%%

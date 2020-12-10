@@ -58,7 +58,7 @@ out/filter-%.pdf: Experiment3/filter.plt | out
 	gnuplot -e "c=$*" -e "outfile='$@'" Experiment3/filter.plt
 
 # Figures needed for the report
-report: out/boy.png out/boy_smoothed.png out/boy_noise.png out/boy_spectrum.png Images/boy_noisy.png
+report: out/boy.png out/boy_smoothed_7.png out/boy_smoothed_15.png out/boy_noise.png out/boy_spectrum.png Images/boy_noisy.png
 report: out/lenna_filtered_spatial.png out/lenna_filtered_frequency.png
 report: out/girl-0.5-1.5-homomorphic.png out/girl-0-2-homomorphic.png out/girl-1-1-homomorphic.png Images/girl.png
 report: out/filter-1.0.pdf out/filter-0.5.pdf out/filter-3.0.pdf out/sobel.pdf

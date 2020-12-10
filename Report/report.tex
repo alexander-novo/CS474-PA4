@@ -75,6 +75,21 @@ These filters can also be used to isolate a specific range of frequency values, 
 	H_{BP}(u,v) = 1 - H(u,v)
 \]
 
+One example of noise is additive cosine noise of the form \(cos(ax + by)\) for some a, b. The noisy image is then expressed as 
+
+\[
+	f_{noisy} (x, y) =  f(x, y) + cos(ax + by).
+\]
+
+When taking the Fourier Transform of the noisy image, we can make use of the linearity of the Fourier Transform operation to decouple the spectrums of the original image and the noise,
+
+\[
+	\mathcal{F}(f_{noisy}(x, y)) = \mathcal{F}( f(x, y) ) + \mathcal{F}(cos(ax + bx))
+\]
+
+Since the Fourier Transform of the cosine function consists of delta functions whose non-zero value locations depend on a and b, to remove the noise the delta impulses simply need to be suppressed to obtain the original image.
+
+
 
 \subsection{Implementation}
 

@@ -51,9 +51,7 @@ void spatially_filter(Image& image, int mask_size) {
 					else
 						output_pixel_value +=
 						    image[i + k][j + l] *
-						    sobel_mask[k + mask_size / 2][l + mask_size / 2];
-
-					// std::cout << k + mask_size/2 << std::endl;
+						    sobel_mask[mask_size/2 - k][mask_size/2 - l];
 				}
 			}
 

@@ -39,12 +39,15 @@ Experiment3/homomorphic: $(OBJDIR)/Experiment3/main.o $(OBJDIR)/Common/image.o $
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 ### Experiment 1 Outputs ###
-out/boy.pgm out/boy_smoothed.pgm out/boy_noise.pgm out/boy_spectrum.png: Experiment1/remove-noise | out
+out/boy.pgm out/boy_smoothed.pgm out/boy_noise.pgm out/boy_spectrum.pgm: Experiment1/remove-noise | out
 	Experiment1/remove-noise Images/boy_noisy.pgm out/boy.pgm
 
 ### Experiment 2 Outputs ###
 out/lenna_filtered_frequency.pgm out/lenna_filtered_spatial.pgm out/sobel_imag.dat out/sobel_spectrum.pgm: Experiment2/frequency-filter | out
 	Experiment2/frequency-filter Images/lenna.pgm out/lenna_filtered.pgm
+
+out/sobel.pdf: out/sobel_imag.dat | out
+	gnuplot Experiment2/sobel.plt
 
 ### Experiment 3 Outputs ###
 .SECONDEXPANSION:
@@ -55,10 +58,10 @@ out/filter-%.pdf: Experiment3/filter.plt | out
 	gnuplot -e "c=$*" -e "outfile='$@'" Experiment3/filter.plt
 
 # Figures needed for the report
-report: out/boy.png out/boy_smoothed.png out/boy_noise.png out/boy_spectrum.png
+report: out/boy.png out/boy_smoothed.png out/boy_noise.png out/boy_spectrum.png Images/boy_noisy.png
 report: out/lenna_filtered_spatial.png out/lenna_filtered_frequency.png
 report: out/girl-0.5-1.5-homomorphic.png out/girl-0-2-homomorphic.png out/girl-1-1-homomorphic.png Images/girl.png
-report: out/filter-1.0.pdf out/filter-0.5.pdf out/filter-3.0.pdf
+report: out/filter-1.0.pdf out/filter-0.5.pdf out/filter-3.0.pdf out/sobel.pdf
 
 clean:
 	rm -rf $(OBJDIR)

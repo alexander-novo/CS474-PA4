@@ -50,8 +50,8 @@ out/lenna_filtered.pgm: Experiment2/frequency-filter | out
 
 
 # Figures needed for the report
-report: out/boy.png out/boy_smoothed.png out/boy_noise.png
-report: out/lenna_filtered_spatial.png lenna_filtered_frequency.png
+report: Images/boy_noisy.png out/boy.png out/boy_smoothed.png out/boy_noise.png out/boy_spectrum.png
+report: out/lenna_filtered_spatial.png out/lenna_filtered_frequency.png
 
 clean:
 	rm -rf $(OBJDIR)

@@ -14,8 +14,8 @@ SOURCES      = Common/image.cpp Common/fft.cpp Common/mask.cpp Experiment1/main.
 EXEC         = Experiment1/remove-noise Experiment2/frequency-filter Experiment3/homomorphic
 # Targets required for the homework, spearated by experiment
 REQUIRED_1   = out/boy.pgm
-REQUIRED_2   = out/lenna_filtered.pgm
-REQUIRED_3   = 
+REQUIRED_2   = 
+REQUIRED_3   = out/girl-0.5-1.5-homomorphic.pgm
 REQUIRED_OUT = $(REQUIRED_1) $(REQUIRED_2) $(REQUIRED_3)
 
 SOURCEDIRS   = $(call uniq, $(dir $(SOURCES)))
@@ -39,19 +39,26 @@ Experiment3/homomorphic: $(OBJDIR)/Experiment3/main.o $(OBJDIR)/Common/image.o $
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 ### Experiment 1 Outputs ###
-out/boy.pgm: Experiment1/remove-noise | out
+out/boy.pgm out/boy_smoothed.pgm out/boy_noise.pgm out/boy_spectrum.png: Experiment1/remove-noise | out
 	Experiment1/remove-noise Images/boy_noisy.pgm out/boy.pgm
 
 ### Experiment 2 Outputs ###
-out/lenna_filtered.pgm: Experiment2/frequency-filter | out
+out/lenna_filtered_frequency.pgm out/lenna_filtered_spatial.pgm out/sobel_imag.dat out/sobel_spectrum.pgm: Experiment2/frequency-filter | out
 	Experiment2/frequency-filter Images/lenna.pgm out/lenna_filtered.pgm
 
 ### Experiment 3 Outputs ###
+.SECONDEXPANSION:
+out/%-homomorphic.pgm: Experiment3/homomorphic Images/$$(word 1,$$(subst -, ,$$*)).pgm | out
+	Experiment3/homomorphic Images/$(word 1,$(subst -, ,$*)).pgm -gl $(word 2,$(subst -, ,$*)) -gh $(word 3,$(subst -, ,$*)) $@
 
+out/filter-%.pdf: Experiment3/filter.plt | out
+	gnuplot -e "c=$*" -e "outfile='$@'" Experiment3/filter.plt
 
 # Figures needed for the report
 report: Images/boy_noisy.png out/boy.png out/boy_smoothed_7.png out/boy_smoothed_15.png out/boy_noise.png out/boy_spectrum.png
 report: out/lenna_filtered_spatial.png out/lenna_filtered_frequency.png
+report: out/girl-0.5-1.5-homomorphic.png out/girl-0-2-homomorphic.png out/girl-1-1-homomorphic.png Images/girl.png
+report: out/filter-1.0.pdf out/filter-0.5.pdf out/filter-3.0.pdf
 
 clean:
 	rm -rf $(OBJDIR)

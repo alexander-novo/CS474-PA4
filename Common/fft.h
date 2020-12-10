@@ -72,7 +72,19 @@ void fft2D(unsigned N, unsigned M, float real_Fuv[], float imag_Fuv[], int isign
  * @param[out] transform  Where the fourier transform is stored. Must have a capacity
  *                        of at least im.rows * im.cols
  */
-void fft2D(Image im, std::complex<float> transform[], bool shift = true);
+void fft2D(const Image& im, std::complex<float> transform[], bool shift = true);
+
+/**
+ * 2 Dimensional Fast Fourier Transform of a MaskResult. Only computes forward
+ * transform. To take inverse transform, just take inverse normally and calculate
+ * image from results.
+ *
+ * @param[in]  im         A mask result to take the fourier transform of.
+ * @param[out] transform  Where the fourier transform is stored. Must have a capacity
+ *                        of at least im.rows * im.cols
+ */
+void fft2D(const MaskResult<float>& im, std::complex<float> transform[],
+           bool shift = true);
 
 /**
  * Plot the spectrum of a 2D Fourier Transform
